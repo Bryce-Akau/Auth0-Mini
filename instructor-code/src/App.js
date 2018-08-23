@@ -14,14 +14,16 @@ class App extends Component {
     this.fetchSecureData = this.fetchSecureData.bind(this);
   }
 
-  componentDidMount(){
+  componentDidMount() {
     axios.get('/api/user-data').then(response => {
-      this.setState({user: response.data.user || null})
-    })
+      this.setState({ user: response.data.user || null });
+    });
   }
 
   login() {
-    const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback')
+    const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback');
+    // http://localhost:3000/somepath
+    // http%3A%2F%2Flocalhost%3A3000%2Fsomepath
     window.location = `https://${process.env.REACT_APP_AUTH0_DOMAIN}/authorize?client_id=${process.env.REACT_APP_AUTH0_CLIENT_ID}&scope=openid%20profile%20email&redirect_uri=${redirectUri}&response_type=code`
   }
 

@@ -27,16 +27,17 @@ app.get('/auth/callback', (req, res) => {
   //hint: code is recieved from client side as a query
   
   let payload ={
-    client_id: process.env.REACT_APP_AUTH0_CLIENT_ID,
-    client_secret: process.env.AUTH0_CLIENT_SECRET,
-    code: req.query.code,
-    grant_type: 'authorization_code',
-    redirect_uri: `http://${req.headers.host}/auth/callback`
+    
     // client_id
     // client_secret
     // code
     // grant_type 
     // redirect_uri
+    client_id: process.env.REACT_APP_AUTH0_CLIENT_ID,
+    client_secret: process.env.AUTH0_CLIENT_SECRET,
+    code: req.query.code,
+    grant_type: 'authorization_code',
+    redirect_uri: `http://${req.headers.host}/auth/callback`
     
   }
   
@@ -46,16 +47,15 @@ app.get('/auth/callback', (req, res) => {
   function tradeCodeForAccessToken(){
     
     //code here..
-    return axios.post(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/oauth/token`, payload)(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/oauth/token`, payload)
+    return axios.post(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/oauth/token`, payload);
+    
   }
   
   //STEP 3.)
   // WRITE a FUNCTION that accepts the access token as a parameter and RETURNS an axios GET to auth0 that passes the access token as a query
   function tradeAccessTokenForUserInfo(response){
-    const accessToken = response.data.access_token
-    return axios.get(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/userinfo?access_token=${accessToken}
-    `)    
-    //code here ..
+    const accessToken = response.data.access_token;
+    return axios.get(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/userinfo?access_token=${accessToken}`)
     
   }
   
@@ -65,23 +65,23 @@ app.get('/auth/callback', (req, res) => {
   // WRITE a FUNCTION that accepts the userInfo as a parameter and RETURNS a block of code.
   // Your code should set session, check your database to see if user exists and return thier info or if they dont exist, insert them into the database
   function storeUserInfoInDataBase(response){
-    const userData = response.data
-    const db = req.app.get('db')
-    db.find_user_by_auth0_id(userData.sub).then(users => {
-      if (users.lenth){
+    const userData = response.data;
+    const db = req.app.get('db');
+    return db.find_user_by_auth0_id(userData.sub).then(users => {
+      if (users.length) {
         const userFromDb = users[0];
         req.session.user = userFromDb;
         res.redirect('/');
       } else {
-        db.create_user([
+        return db.create_user([
           userData.sub,
           userData.email,
           userData.name,
           userData.picture,
         ]).then(newUsers => {
-          req.session.user = newUsers[0]
-          res.redirect('/')
-        })
+          req.session.user = newUsers[0];
+          res.redirect('/');
+        });
       }
     })
   }
@@ -92,9 +92,10 @@ app.get('/auth/callback', (req, res) => {
   .then(accessToken => tradeAccessTokenForUserInfo(accessToken))
   .then(userInfo => storeUserInfoInDataBase(userInfo))
   .catch(error => {
-    console.log('-------------------server error', error)
-    res.status(500).send('check server for error')
-  })
+    console.log('-------------- server error', error);
+    res.status(500).send('Check the server for error message');
+  });
+  
 });
 
 app.post('/api/logout', (req, res) => {
@@ -122,3 +123,5 @@ const SERVER_PORT = process.env.SERVER_PORT || 3040;
 app.listen(SERVER_PORT, () => {
   console.log('Server listening on port ' + SERVER_PORT);
 });
+
+
